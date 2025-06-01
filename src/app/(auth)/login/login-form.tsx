@@ -2,89 +2,55 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { authenticateUser } from "./business/api-requests";
-import { AxiosError } from "axios";
-import { ApiError } from "@/lib/api";
+import { Label } from "@/components/ui/label";
+import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-
-const formSchema = z.object({
-    email: z.string().email({
-        message: "Email inválido.",
-    }),
-    password: z.string().min(6, {
-        message: "Senha deve ter pelo menos 6 caracteres.",
-    }),
-});
-
-export type UserLoginFormSchema = z.infer<typeof formSchema>;
+import { login } from "./business/actions";
+import { redirect } from "next/navigation";
 
 export function LoginForm() {
-    const form = useForm<UserLoginFormSchema>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            email: "",
-            password: "",
-        },
+    const [state, action, pending] = useActionState(login, {
+        success: false,
+        message: "",
+        errors: {},
     });
 
-    async function onSubmit(data: UserLoginFormSchema) {
-        try {
-            await authenticateUser(data);
-
-            console.log("Login successful");
-        } catch (error: unknown) {
-            if (error instanceof AxiosError) {
-                const apiError = error as ApiError;
-                toast.error(apiError?.response?.data?.message || "Erro inesperado. Tente novamente mais tarde.");
-            } else {
-                toast.error("Erro inesperado. Tente novamente mais tarde.");
-            }
+    useEffect(() => {
+        if (state.success) {
+            toast.success(state.message || "Login realizado com sucesso!");
+            redirect("/dashboard");
+        } else if (state.errors) {
+            toast.error(state.message || "Erro ao fazer login. Verifique os campos e tente novamente.");
         }
-    }
+    }, [state]);
 
     return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-                <div className="flex flex-col gap-6">
-                    <div className="grid gap-2">
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Nome completo</FormLabel>
-                                    <FormControl>
-                                        <Input type="email" placeholder="m@examplo.com" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-                    <div className="grid gap-2">
-                        <FormField
-                            control={form.control}
-                            name="password"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Senha</FormLabel>
-                                    <FormControl>
-                                        <Input type="password" placeholder="Sua senha" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-                    <Button type="submit" className="w-full">
-                        Login
-                    </Button>
+        <form action={action}>
+            <div className="flex flex-col gap-6">
+                <div className="grid gap-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input type="email" placeholder="m@examplo.com" name="email" />
+                    {state.errors?.email &&
+                        state.errors.email.map((error, index) => (
+                            <p key={index} className="text-red-500 text-sm">
+                                {error}
+                            </p>
+                        ))}
                 </div>
-            </form>
-        </Form>
+                <div className="grid gap-2">
+                    <Label htmlFor="password">Senha</Label>
+                    <Input type="password" placeholder="Sua senha" name="password" />
+                    {state.errors?.password &&
+                        state.errors.password.map((error, index) => (
+                            <p key={index} className="text-red-500 text-sm">
+                                {error}
+                            </p>
+                        ))}
+                </div>
+                <Button type="submit" className="w-full" disabled={pending}>
+                    {pending ? "Entrando..." : "Entrar"}
+                </Button>
+            </div>
+        </form>
     );
 }

@@ -1,9 +1,11 @@
+"use server";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RegisterForm } from "./register-form";
 import Link from "next/link";
 import { Toaster } from "@/components/ui/sonner";
 
-export default function Page() {
+export default async function Page() {
     return (
         <>
             <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">

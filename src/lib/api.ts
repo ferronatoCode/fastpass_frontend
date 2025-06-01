@@ -1,16 +1,22 @@
-import axios, { AxiosError } from "axios";
+import { cookies } from "next/headers";
 
-export const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL,
-    headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-    },
-});
+export const api = async (url: string, options: RequestInit) => {
+    const cookiesStore = await cookies();
 
-interface ApiErrorPayload {
+    const authenticatedOptions = cookiesStore.get("access_token")
+        ? {
+              ...options,
+              headers: {
+                  ...options.headers,
+                  Authorization: `Bearer ${cookiesStore.get("access_token")?.value}`,
+              },
+          }
+        : options;
+
+    return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${url}`, authenticatedOptions);
+};
+
+export interface ApiErrorPayload {
     statusCode?: number;
     message: string;
 }
-
-export type ApiError = AxiosError<ApiErrorPayload>;

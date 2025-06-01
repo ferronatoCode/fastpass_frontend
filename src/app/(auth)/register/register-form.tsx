@@ -2,169 +2,102 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { createUser } from "./business/api-requests";
+import { Label } from "@/components/ui/label";
+import { useActionState, useEffect } from "react";
+import { singup } from "./business/actions";
 import { toast } from "sonner";
-import { ApiError } from "@/lib/api";
-import { AxiosError } from "axios";
 import { redirect } from "next/navigation";
 
-const formSchema = z.object({
-    name: z.string().min(1, {
-        message: "Nome completo é obrigatório.",
-    }),
-    email: z.string().email({
-        message: "Email inválido.",
-    }),
-    cpf: z.string().min(1, {
-        message: "CPF é obrigatório.",
-    }),
-    birth_date: z.string().min(1, {
-        message: "Data de nascimento é obrigatória.",
-    }),
-    phone: z.string().optional(),
-    password: z.string().min(6, {
-        message: "Senha deve ter pelo menos 6 caracteres.",
-    }),
-});
-
-export type UserFormSchema = z.infer<typeof formSchema>;
-
 export function RegisterForm() {
-    const form = useForm<UserFormSchema>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            name: "",
-            email: "",
-            cpf: "",
-            birth_date: "",
-            phone: "",
-            password: "",
-        },
+    const [state, action, pending] = useActionState(singup, {
+        success: false,
+        message: "",
+        errors: {},
     });
 
-    async function onSubmit(data: UserFormSchema) {
-        try {
-            await createUser(data);
-            form.reset();
-            toast.success("Usuário criado com sucesso!", {
+    useEffect(() => {
+        if (state.success) {
+            toast.success(state.message || "Registro realizado com sucesso!", {
+                duration: 10000,
                 action: {
-                    label: "Voltar",
-                    onClick: () => redirect("/login"),
+                    label: "Continuar",
+                    onClick: () => {
+                        redirect("/login");
+                    },
                 },
             });
-        } catch (error: unknown) {
-            if (error instanceof AxiosError) {
-                const apiError = error as ApiError;
-                toast.error(apiError?.response?.data?.message || "Erro inesperado. Tente novamente mais tarde.");
-            } else {
-                toast.error("Erro inesperado. Tente novamente mais tarde.");
-            }
+        } else if (state.errors) {
+            toast.error(state.message || "Erro ao registrar. Verifique os campos e tente novamente.");
         }
-    }
+    }, [state]);
 
     return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-                <div className="flex flex-col gap-6">
-                    <div className="grid gap-2">
-                        <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Nome completo</FormLabel>
-                                    <FormControl>
-                                        <Input type="text" placeholder="nome exemplo" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-                    <div className="grid gap-2">
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Email</FormLabel>
-                                    <FormControl>
-                                        <Input type="email" placeholder="test@test.com" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>{" "}
-                    <div className="grid gap-2">
-                        <FormField
-                            control={form.control}
-                            name="cpf"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>CPF</FormLabel>
-                                    <FormControl>
-                                        <Input type="text" placeholder="000.000.000-00" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>{" "}
-                    <div className="grid gap-2">
-                        <FormField
-                            control={form.control}
-                            name="birth_date"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Data de Nascimento</FormLabel>
-                                    <FormControl>
-                                        <Input type="date" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>{" "}
-                    <div className="grid gap-2">
-                        <FormField
-                            control={form.control}
-                            name="phone"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Telefone</FormLabel>
-                                    <FormControl>
-                                        <Input type="tel" placeholder="(00) 00000-0000" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-                    <div className="grid gap-2">
-                        <FormField
-                            control={form.control}
-                            name="password"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Senha</FormLabel>
-                                    <FormControl>
-                                        <Input type="password" placeholder="********" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-                    <Button type="submit" className="w-full">
-                        Salvar
-                    </Button>
+        <form action={action}>
+            <div className="flex flex-col gap-6">
+                <div className="grid gap-2">
+                    <Label htmlFor="name">Nome Completo</Label>
+                    <Input type="text" placeholder="nome exemplo" name="name" />
+                    {state.errors?.name &&
+                        state.errors.name.map((error, index) => (
+                            <p key={index} className="text-red-500 text-sm">
+                                {error}
+                            </p>
+                        ))}
                 </div>
-            </form>
-        </Form>
+                <div className="grid gap-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input type="email" placeholder="test@test.com" name="email" />
+                    {state.errors?.email &&
+                        state.errors.email.map((error, index) => (
+                            <p key={index} className="text-red-500 text-sm">
+                                {error}
+                            </p>
+                        ))}
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="cpf">CPF</Label>
+                    <Input type="text" placeholder="000.000.000-00" name="cpf" />
+                    {state.errors?.cpf &&
+                        state.errors.cpf.map((error, index) => (
+                            <p key={index} className="text-red-500 text-sm">
+                                {error}
+                            </p>
+                        ))}
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="birth_date">Data de Nascimento</Label>
+                    <Input type="date" name="birth_date" />
+                    {state.errors?.birth_date &&
+                        state.errors.birth_date.map((error, index) => (
+                            <p key={index} className="text-red-500 text-sm">
+                                {error}
+                            </p>
+                        ))}
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="phone">Telefone</Label>
+                    <Input type="tel" placeholder="(00) 00000-0000" name="phone" />
+                    {state.errors?.phone &&
+                        state.errors.phone.map((error, index) => (
+                            <p key={index} className="text-red-500 text-sm">
+                                {error}
+                            </p>
+                        ))}
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="password">Senha</Label>
+                    <Input type="password" placeholder="********" name="password" />
+                    {state.errors?.password &&
+                        state.errors.password.map((error, index) => (
+                            <p key={index} className="text-red-500 text-sm">
+                                {error}
+                            </p>
+                        ))}
+                </div>
+                <Button disabled={pending} type="submit" className="w-full">
+                    {pending ? "Registrando..." : "Registrar"}
+                </Button>
+            </div>
+        </form>
     );
 }
