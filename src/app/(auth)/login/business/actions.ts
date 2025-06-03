@@ -63,7 +63,7 @@ async function createAccessTokenCookie(token: string) {
     cookieStore.set("access_token", token, {
         httpOnly: true,
         secure: true,
-        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 hour
+        expires: new Date(Date.now() + 3600), // 1 hour
         sameSite: "lax",
         path: "/",
     });
