@@ -2,7 +2,7 @@
 
 import { ActionResponse } from "@/types/action-response";
 import { z } from "zod";
-import { authenticateUser } from "./api-requests";
+import { AuthenticateApiResponse, authenticateUser } from "./api-requests";
 import { cookies } from "next/headers";
 import ApiError from "@/errors/api-error";
 
@@ -22,9 +22,9 @@ export async function login(state: ActionResponse | null, data: FormData): Promi
         const parsedData = Object.fromEntries(data.entries());
         formSchema.parse(parsedData);
 
-        const { accessToken } = await authenticateUser(parsedData as LoginFormData);
+        const authenticationData = await authenticateUser(parsedData as LoginFormData);
 
-        await createAccessTokenCookie(accessToken);
+        await createTokensCookies(authenticationData);
 
         return {
             success: true,
@@ -57,13 +57,21 @@ export async function login(state: ActionResponse | null, data: FormData): Promi
     }
 }
 
-async function createAccessTokenCookie(token: string) {
+async function createTokensCookies({ accessToken, refreshToken, expiresIn }: AuthenticateApiResponse): Promise<void> {
     const cookieStore = await cookies();
 
-    cookieStore.set("access_token", token, {
+    cookieStore.set("refresh_token", refreshToken, {
         httpOnly: true,
         secure: true,
-        expires: new Date(Date.now() + 3600), // 1 hour
+        expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        sameSite: "lax",
+        path: "/",
+    });
+
+    cookieStore.set("access_token", accessToken, {
+        httpOnly: true,
+        secure: true,
+        expires: new Date(Date.now() + expiresIn),
         sameSite: "lax",
         path: "/",
     });

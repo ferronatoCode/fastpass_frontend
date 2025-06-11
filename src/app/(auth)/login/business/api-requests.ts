@@ -2,8 +2,10 @@ import { api } from "@/lib/api";
 import { LoginFormData } from "./actions";
 import ApiError from "@/errors/api-error";
 
-interface AuthenticateApiResponse {
+export interface AuthenticateApiResponse {
     accessToken: string;
+    refreshToken: string;
+    expiresIn: number;
 }
 
 export async function authenticateUser(user: LoginFormData): Promise<AuthenticateApiResponse> {
