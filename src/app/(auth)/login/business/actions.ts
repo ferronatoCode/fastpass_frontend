@@ -71,7 +71,7 @@ async function createTokensCookies({ accessToken, refreshToken, expiresIn }: Aut
     cookieStore.set("access_token", accessToken, {
         httpOnly: true,
         secure: true,
-        expires: new Date(Date.now() + expiresIn),
+        expires: new Date(Date.now() + expiresIn * 1000),
         sameSite: "lax",
         path: "/",
     });

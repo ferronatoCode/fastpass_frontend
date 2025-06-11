@@ -1,53 +1,50 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Avatar } from '@/components/ui/avatar';
-
-type Profile = {
-  balance: number;
-  code: string;
-};
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { AuthContextType, useAuth } from "@/contexts/authentication-context";
+import { userRole } from "@/types/roles";
+import { faWallet } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export function ProfilePage() {
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [error, setError] = useState('');
+    const { user }: AuthContextType = useAuth();
 
-  useEffect(() => {
-    fetch('/api/profile', { credentials: 'include' })
-      .then(res => res.json())
-      .then(setProfile)
-      .catch(() => setError('Erro ao carregar perfil'));
-  }, []);
+    return (
+        <div className="pt-20 pb-20 px-4 overflow-y-auto flex flex-col items-center">
+            <Card className="w-full md:w-sm p-6 flex flex-col items-center">
+                <Avatar className="w-24 h-24 mb-4">
+                    <AvatarImage src={"user_placeholder.png"} alt={user.name} />
+                    <AvatarFallback className="bg-blue-100 text-blue-600 text-xl">{user.name}</AvatarFallback>
+                </Avatar>
+                <h2 className="text-xl font-semibold">{user.name}</h2>
+                <p className="text-gray-500 text-sm mb-3">{user.email}</p>
+                <Badge className="bg-blue-50 text-blue-600 mb-4">{userRole(user.role)}</Badge>
+            </Card>
 
-  if (error) return <p>{error}</p>;
-  if (!profile) return <p>Carregando...</p>;
+            <Card className="w-full md:w-sm p-6 mt-6">
+                <div className="flex flex-col">
+                    <p className="text-gray-500 text-sm">
+                        {" "}
+                        <FontAwesomeIcon icon={faWallet} /> Saldo Atual
+                    </p>
+                    <h3 className="text-3xl font-semibold mb-4">{user.balance} Moedas</h3>
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-between p-4 bg-black text-white">
-      <div className="w-full max-w-sm bg-gray-900 rounded-xl border border-white p-6 text-center space-y-4">
-        <div className="flex justify-center">
-          <div className="w-24 h-24 rounded-full bg-gray-600 flex items-center justify-center">
-            <Avatar className="w-24 h-24" />
-          </div>
+                    <div className="flex gap-4 mb-6">
+                        <Button className="flex-1 !rounded-button bg-blue-600">
+                            <i className="fas fa-plus mr-2"></i>
+                            Recarga
+                        </Button>
+                    </div>
+
+                    <Separator className="mb-4" />
+
+                    <div className="flex items-center justify-between"></div>
+                </div>
+            </Card>
         </div>
-
-        <div>
-          <p className="text-sm uppercase tracking-widest text-gray-300">SALDO</p>
-          <p className="text-xl font-bold">{profile.balance} COINS</p>
-        </div>
-
-        <p className="italic text-gray-400">{`"${profile.code}"`}</p>
-
-        <div className="mt-6 border-t pt-4 text-left">
-          <h2 className="text-sm uppercase text-gray-400">Histórico</h2>
-          <p className="text-sm text-gray-500">Em construção...</p>
-        </div>
-      </div>
-
-      <div className="w-full max-w-sm flex justify-between mt-6">
-        <button className="bg-white text-black rounded-full w-10 h-10 text-xl font-bold">{'<'}</button>
-        <button className="bg-white text-black rounded-full w-10 h-10 text-xl font-bold">$</button>
-      </div>
-    </div>
-  );
+    );
 }

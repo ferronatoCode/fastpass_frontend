@@ -1,5 +1,6 @@
 "use client";
 
+import { UserRole } from "@/types/roles";
 import { createContext, useContext } from "react";
 
 type UserType = "COMMON" | "SUPPLIER" | "ADMIN";
@@ -8,11 +9,12 @@ export interface User {
     name: string;
     email: string;
     balance: number;
+    role: UserRole;
     user_type: UserType;
 }
 
-interface AuthContextType {
-    user: User | null;
+export interface AuthContextType {
+    user: User;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
