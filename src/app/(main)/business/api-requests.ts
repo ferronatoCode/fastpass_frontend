@@ -25,3 +25,34 @@ export async function getUser(): Promise<User> {
 
     return await res.json();
 }
+
+export interface Product {
+    id: string;
+    name: string;
+    description: string;
+    value: number;
+    category: string;
+}
+
+export async function getProducts(): Promise<Product[]> {
+    const cookieStore = await cookies();
+
+    const res = await api("products", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${cookieStore.get("access_token")?.value || ""}`,
+        },
+        next: {
+            revalidate: 30,
+        },
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new ApiError(errorData.message || "Erro ao buscar produtos");
+    }
+
+    return await res.json();
+}
