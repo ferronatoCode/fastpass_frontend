@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Product } from "../business/api-requests";
@@ -18,6 +19,8 @@ export default function RegularTickets({ categorySelected, products }: RegularTi
         [categorySelected, products],
     );
 
+    const router = useRouter();
+
     return (
         <>
             {/* REGULAR TICKETS */}
@@ -35,8 +38,9 @@ export default function RegularTickets({ categorySelected, products }: RegularTi
                                 </div>
                                 <div className="mt-2 flex justify-between items-center">
                                     <span className="font-medium">Valor: {item.value}</span>
-                                    <Button className="bg-black text-white hover:bg-blue-700 text-sm rounded-sm">
-                                        Comprar ticket
+                                    <Button onClick={() => router.push("/dashboard/confirmacaoCompra")}
+                                     className="bg-black text-white hover:bg-blue-700 text-sm rounded-sm"
+                                    >Comprar ticket
                                     </Button>
                                 </div>
                             </Card>
@@ -69,7 +73,8 @@ export default function RegularTickets({ categorySelected, products }: RegularTi
                                     <Badge className="bg-blue-600 text-white rounded-sm">Valor: {product.value}</Badge>
                                 </div>
                                 <p className="text-sm text-gray-500">{product.description}</p>
-                                <Button className="w-full mt-2 bg-black text-white hover:bg-blue-700 text-sm rounded-sm">
+                                <Button onClick={() => router.push("/dashboard/confirmacaoCompra")}
+                                        className="w-full mt-2 bg-black text-white hover:bg-blue-700 text-sm rounded-sm">
                                     Comprar ticket
                                 </Button>
                             </div>
