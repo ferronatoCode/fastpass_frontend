@@ -10,7 +10,9 @@ import ConfirmationScreen from "./confirmation-screen";
 export default async function TicketInfo({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const ticket = await getTicketConfirmation(parseInt(id));
-    const qrcode = await QRCode.toDataURL(`${process.env.NEXT_PUBLIC_FRONT_URL}/ticket/confirm?hash=${ticket.id}`);
+    const qrcode = await QRCode.toDataURL(
+        `${process.env.NEXT_PUBLIC_FRONT_URL}/ticket/confirm?hash=${ticket.confirmation_hash}`,
+    );
 
     return (
         <>
