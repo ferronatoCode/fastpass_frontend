@@ -17,17 +17,17 @@ export default async function TicketInfo({ params }: { params: Promise<{ id: str
     return (
         <>
             <ConfirmationScreen ticket_id={ticket.id} />
-            <div className="flex min-h-svh w-full mt-8 md:mt-16 justify-center p-6 md:p-10">
+            <div className="flex h-full w-full justify-center p-6">
                 <div className="w-full max-w-sm">
                     <div className="flex flex-col gap-6">
-                        <div className="mt-16 mb-12 flex flex-col items-center">
+                        <div className="mb-4 flex flex-col items-center">
                             <div className="flex items-center mb-4">
                                 <span className="ml-2 font-bold text-3xl text-blue-600">FastPass</span>
                             </div>
                             <p className="text-gray-500 text-center">Apresente o QR Code abaixo para pagamento</p>
                         </div>
 
-                        <Card>
+                        <Card className="mb-12">
                             <CardHeader>
                                 <CardTitle className="text-2xl text-center">Confirmação</CardTitle>
                             </CardHeader>

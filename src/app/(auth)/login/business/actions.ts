@@ -62,15 +62,15 @@ async function createTokensCookies({ accessToken, refreshToken, expiresIn }: Aut
 
     cookieStore.set("refresh_token", refreshToken, {
         httpOnly: true,
-        secure: true,
+        secure: false,
         expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
         sameSite: "lax",
         path: "/",
     });
 
     cookieStore.set("access_token", accessToken, {
-        httpOnly: true,
-        secure: true,
+        httpOnly: false,
+        secure: false,
         expires: new Date(Date.now() + expiresIn * 1000),
         sameSite: "lax",
         path: "/",

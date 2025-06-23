@@ -8,10 +8,10 @@ import { faBolt } from "@fortawesome/free-solid-svg-icons";
 export default function Page() {
     return (
         <>
-            <div className="flex min-h-svh w-full mt-8 md:mt-16 justify-center p-6 md:p-10">
+            <div className="flex h-full w-full justify-center p-6 md:p-10">
                 <div className="w-full max-w-sm">
                     <div className={"flex flex-col gap-6"}>
-                        <div className="mt-16 mb-12 flex flex-col items-center">
+                        <div className="mt-8 mb-12 flex flex-col items-center">
                             <div className="flex items-center mb-4">
                                 <FontAwesomeIcon icon={faBolt} className="text-blue-600 text-3xl" />
                                 <span className="ml-2 font-bold text-3xl">FastPass</span>
