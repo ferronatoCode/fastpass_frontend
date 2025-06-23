@@ -3,18 +3,19 @@
 import { useAuth } from "@/contexts/authentication-context";
 import { redirect, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import { confirmTicket } from "../business/api-request";
+import { confirmTicket } from "../business/api-request-client";
 
-export const TicketConfirmation = () => {
+const TicketConfirmation = () => {
     const searchParams = useSearchParams();
-    const { user } = useAuth();
+    const userContext = useAuth();
 
     useEffect(() => {
-        if (user.role === "SUPPLIER")
+        if (userContext.user.user_type === "SUPPLIER") {
             confirmTicket(searchParams.get("hash") as string).finally(() => redirect("/dashboard"));
+        }
 
         redirect("/dashboard");
-    }, [user, searchParams]);
+    }, [userContext.user, searchParams]);
 
     return (
         <div className="flex min-h-svh w-full mt-8 md:mt-16 justify-center p-6 md:p-10">
@@ -31,3 +32,5 @@ export const TicketConfirmation = () => {
         </div>
     );
 };
+
+export default TicketConfirmation;
